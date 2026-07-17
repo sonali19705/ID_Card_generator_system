@@ -1,92 +1,280 @@
-ID CARD GENERATOR SYSTEM — SETUP GUIDE (WAMP)
-================================================
+# ID Card Generator System
 
-WHAT WAS FIXED
---------------
-- Login, registration, session handling (users + a separate admin login)
-- Profile update (now actually saves, including photo upload)
-- Both request forms (Fresher ID Request & New ID Request) now save to the
-  database correctly and are protected behind login
-- Admin dashboard / requests / approved pages are now protected behind an
-  admin login and use a single consistent database schema
-- Approve / Reject now works end-to-end:
-    - Approve  -> generates a real, professional two-sided PDF ID card and
-                  saves it to /generated_ids
-    - Reject   -> admin is asked for a rejection reason, which the user can
-                  see on "My ID History"
-- Users can only download their ID card PDF after it has been approved
-- All SQL queries now use prepared statements (fixes SQL injection issues)
-- No UI/CSS/layout was changed — only backend PHP logic.
+A web-based ID Card Generator System developed using **Core PHP, MySQL, HTML, CSS, and JavaScript**. The system allows users to register, submit ID card requests, and download their generated ID cards after admin approval.
 
---------------------------------------------------------------
-STEP 1 — Copy the project folder into your WAMP www directory
---------------------------------------------------------------
-Example: C:\wamp64\www\ID_Card_Generator_System_WD
+---
 
---------------------------------------------------------------
-STEP 2 — Import the database
---------------------------------------------------------------
-1. Start WAMP and open phpMyAdmin (http://localhost/phpmyadmin).
-2. Click "Import" and select the file "schema.sql" from this project.
-   This creates the "idcard_db" database with 3 tables:
-      - users
-      - admins
-      - id_requests
+## Features
 
---------------------------------------------------------------
-STEP 3 — Configure the database connection
---------------------------------------------------------------
-Open db_connect.php and set your MySQL username/password if they are
-different from the defaults (root / your WAMP MySQL password).
+### User Module
+- User Registration
+- User Login & Logout
+- Complete Profile
+- Upload Profile Photo
+- Submit Fresher ID Request
+- Submit New ID Request
+- View Request History
+- Download Approved ID Card PDF
+- View Rejection Reason (if rejected)
 
---------------------------------------------------------------
-STEP 4 — Create the default admin account
---------------------------------------------------------------
-In your browser, open:
+### Admin Module
+- Secure Admin Login
+- View Dashboard
+- Manage ID Card Requests
+- Approve or Reject Requests
+- Generate Professional PDF ID Cards
+- Store Generated PDFs
+- View Approved Requests
 
-    http://localhost/ID_Card_Generator_System_WD/setup_admin.php
+---
 
-This creates the admin login:
+## Technologies Used
 
-    Email:    admin@idcard.com
-    Password: admin123
+- Core PHP
+- MySQL
+- HTML5
+- CSS3
+- JavaScript
+- WAMP Server
 
-After it runs once, you can delete setup_admin.php (optional, for security).
+---
 
---------------------------------------------------------------
-STEP 5 — Make sure these folders are writable
---------------------------------------------------------------
-- /uploads
-- /uploads/photos
-- /generated_ids
+## Project Structure
 
-(On WAMP/Windows this is usually fine by default.)
+```
+ID_Card_Generator_System_WD/
+│
+├── uploads/
+│   └── photos/
+│
+├── generated_ids/
+│
+├── index.php
+├── register.php
+├── profile.php
+├── user-dashboard.php
+├── fresher-id-request.php
+├── new-id-request.php
+├── my-id-history.php
+│
+├── admin-login.php
+├── admin-dashboard.php
+├── admin_requests.php
+├── admin_approved.php
+│
+├── update_status.php
+├── generate_pdf.php
+├── pdf_generator.php
+├── db_connect.php
+├── schema.sql
+├── setup_admin.php
+└── README.md
+```
 
---------------------------------------------------------------
-STEP 6 — Use the system
---------------------------------------------------------------
-Regular users:
-    http://localhost/ID_Card_Generator_System_WD/index.php     (login)
-    http://localhost/ID_Card_Generator_System_WD/register.php  (register)
+---
 
-Admin:
-    http://localhost/ID_Card_Generator_System_WD/admin-login.php
+# Installation Guide
 
---------------------------------------------------------------
-WORKFLOW
---------------------------------------------------------------
-1. User registers -> logs in -> completes profile.
-2. User submits an ID card request (Fresher ID Request or New ID Request).
-3. Admin logs in, sees the request under "Requests" / "Dashboard".
-4. Admin clicks Approve (auto-generates the PDF ID card) or Reject
-   (asks for a reason).
-5. User checks "My ID History":
-      - Approved -> Download button appears (downloads the generated PDF)
-      - Rejected -> shows the rejection reason
-      - Pending  -> shows "—"
+## Step 1: Copy Project
 
-NOTES
------
-- The PDF ID card is generated by a small built-in PDF writer
-  (pdf_generator.php) — no external libraries/Composer needed, so it works
-  out of the box on plain WAMP with the GD extension (enabled by default).
+Copy the project folder into the WAMP `www` directory.
+
+Example:
+
+```
+C:\wamp64\www\ID_Card_Generator_System_WD
+```
+
+---
+
+## Step 2: Start WAMP
+
+Start **WAMP Server**.
+
+Ensure the WAMP icon turns **Green**, indicating that Apache and MySQL are running successfully.
+
+---
+
+## Step 3: Create Database
+
+1. Open:
+
+```
+http://localhost/phpmyadmin
+```
+
+2. Create a new database named:
+
+```
+idcard_db
+```
+
+3. Click **Import**.
+
+4. Select:
+
+```
+schema.sql
+```
+
+5. Click **Go**.
+
+The following tables will be created:
+
+- users
+- admins
+- id_requests
+
+---
+
+## Step 4: Configure Database
+
+Open:
+
+```
+db_connect.php
+```
+
+Update database credentials if necessary.
+
+Example:
+
+```php
+$host = "localhost";
+$user = "root";
+$password = "";
+$database = "idcard_db";
+```
+
+---
+
+## Step 5: Create Admin Account
+
+Open the following URL:
+
+```
+http://localhost/ID_Card_Generator_System_WD/setup_admin.php
+```
+
+Default Admin Credentials:
+
+```
+Email:
+admin@idcard.com
+
+Password:
+admin123
+```
+
+After creating the admin account, you may delete `setup_admin.php` for security.
+
+---
+
+## Step 6: Folder Permissions
+
+Ensure the following folders are writable:
+
+```
+uploads/
+uploads/photos/
+generated_ids/
+```
+
+Windows (WAMP) usually provides the required permissions by default.
+
+---
+
+# Running the Project
+
+### User
+
+Login:
+
+```
+http://localhost/ID_Card_Generator_System_WD/index.php
+```
+
+Register:
+
+```
+http://localhost/ID_Card_Generator_System_WD/register.php
+```
+
+---
+
+### Admin
+
+```
+http://localhost/ID_Card_Generator_System_WD/admin-login.php
+```
+
+---
+
+# System Workflow
+
+1. User registers an account.
+2. User logs in.
+3. User completes profile details.
+4. User submits an ID card request.
+5. Request is stored in the database.
+6. Admin reviews pending requests.
+7. Admin approves or rejects the request.
+8. On approval:
+   - A professional PDF ID card is generated.
+   - The PDF is stored in the `generated_ids` folder.
+9. The user can download the PDF from **My ID History**.
+10. If rejected, the rejection reason is displayed.
+
+---
+
+# Security Features
+
+- Session-based Authentication
+- Separate User and Admin Login
+- Prepared SQL Statements
+- Protected Admin Pages
+- Protected User Pages
+- File Upload Validation
+- Download Available Only After Approval
+
+---
+
+# Fixed Issues
+
+- Fixed Login System
+- Fixed Registration
+- Fixed Session Management
+- Fixed Profile Update
+- Fixed Photo Upload
+- Fixed ID Request Submission
+- Fixed Admin Authentication
+- Fixed Dashboard Protection
+- Fixed Approve/Reject Workflow
+- Fixed PDF Generation
+- Fixed Download Permission Logic
+- Fixed SQL Injection Vulnerabilities
+- Maintained Existing UI Without Design Changes
+
+---
+
+# Default Admin Credentials
+
+| Email | Password |
+|--------|----------|
+| admin@idcard.com | admin123 |
+
+---
+
+# Notes
+
+- The system generates PDF ID cards without requiring Composer or external libraries.
+- PDF generation is handled using the built-in `pdf_generator.php`.
+- Works directly with WAMP Server.
+
+---
+
+## Developed For
+
+**College Mini Project**
+
+Built using Core PHP and MySQL for learning web development and CRUD operations.
