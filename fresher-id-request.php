@@ -1,43 +1,72 @@
 <?php
-include 'db_connect.php';  // Include your common database connection
+session_start();
+include 'db_connect.php';
 
+if (!isset($_SESSION['user_id'])) {
+    header("Location: index.php");
+    exit;
+}
+
+$user_id = $_SESSION['user_id'];
 $message = "";
 
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Collect form data
-    $firstName   = $_POST['first_name'];
-    $middleName  = $_POST['middle_name'];
-    $lastName    = $_POST['last_name'];
-    $enrollment  = $_POST['enrollment'];
-    $department  = $_POST['department'];
-    $designation = $_POST['designation'];
-    $dob         = $_POST['dob'];
-    $bloodGroup  = $_POST['blood_group'];
-    $email       = $_POST['email'];
-    $mobile      = $_POST['mobile'];
+    $firstName   = trim($_POST['first_name'] ?? '');
+    $middleName  = trim($_POST['middle_name'] ?? '');
+    $lastName    = trim($_POST['last_name'] ?? '');
+    $enrollment  = trim($_POST['enrollment'] ?? '');
+    $department  = trim($_POST['department'] ?? '');
+    $designation = trim($_POST['designation'] ?? '');
+    $dob         = $_POST['dob'] ?? '';
+    $bloodGroup  = trim($_POST['blood_group'] ?? '');
+    $email       = trim($_POST['email'] ?? '');
+    $mobile      = trim($_POST['mobile'] ?? '');
 
-    // Handle file upload
-    $photo = "";
-    if (isset($_FILES['photo']) && $_FILES['photo']['error'] == 0) {
-        $targetDir = "uploads/photos/";
-        if (!is_dir($targetDir)) { mkdir($targetDir, 0777, true); }
-        $photo = $targetDir . basename($_FILES["photo"]["name"]);
-        move_uploaded_file($_FILES["photo"]["tmp_name"], $photo);
-    }
+    $dob = $dob !== '' ? $dob : null;
 
-    // Combine full name
-    $fullName = $firstName . " " . ($middleName ? $middleName . " " : "") . $lastName;
-
-    // Insert into id_requests table
-    $sql = "INSERT INTO id_requests (student_name, roll_no, course, year, STATUS, document)
-            VALUES ('$fullName', '$enrollment', '$department', '$designation', 'Pending', '$photo')";
-
-    if ($conn->query($sql) === TRUE) {
-        $message = "Request submitted successfully!";
+    if ($firstName === '' || $lastName === '' || $enrollment === '') {
+        $message = "Please fill in all required fields.";
     } else {
-        $message = "Error: " . $conn->error;
+        // Handle photo upload (required for a fresher ID request)
+        $photo = "";
+        if (isset($_FILES['photo']) && $_FILES['photo']['error'] == 0) {
+            $allowed = ['image/jpeg', 'image/png', 'image/gif'];
+            $fileType = mime_content_type($_FILES['photo']['tmp_name']);
+            if (in_array($fileType, $allowed)) {
+                $targetDir = "uploads/photos/";
+                if (!is_dir($targetDir)) { mkdir($targetDir, 0777, true); }
+                $ext = pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION);
+                $photo = $targetDir . "fresher_" . $user_id . "_" . time() . "." . $ext;
+                move_uploaded_file($_FILES["photo"]["tmp_name"], $photo);
+            } else {
+                $message = "Photo must be a JPG, PNG or GIF image.";
+            }
+        } else {
+            $message = "Please upload a photo for your ID card.";
+        }
+
+        if (empty($message)) {
+            // Combine full name
+            $fullName = $firstName . " " . ($middleName ? $middleName . " " : "") . $lastName;
+
+            $stmt = $conn->prepare("INSERT INTO id_requests
+                (user_id, request_type, student_name, roll_no, course, year, dob, blood_group, email, mobile, photo, status)
+                VALUES (?, 'Fresher', ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')");
+            $stmt->bind_param(
+                "isssssssss",
+                $user_id, $fullName, $enrollment, $department, $designation, $dob, $bloodGroup, $email, $mobile, $photo
+            );
+
+            if ($stmt->execute()) {
+                $message = "Request submitted successfully! You can track it in My ID History.";
+            } else {
+                $message = "Something went wrong. Please try again.";
+            }
+            $stmt->close();
+        }
     }
 }
 ?>
@@ -60,7 +89,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <li><a href="profile.php">Profile</a></li>
         <li><a href="my-id-history.php">My IDs</a></li>
     </ul>
-    <form method="POST" action="index.php" style="display:inline;">
+    <form method="POST" action="logout.php" style="display:inline;">
         <button type="submit" class="logout-btn">Logout</button>
     </form>
 </nav>
@@ -74,7 +103,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <!-- Request Form -->
 <section class="form-section">
     <div class="form-card">
-        <?php if(!empty($message)) echo "<p style='color:green;'>$message</p>"; ?>
+        <?php if(!empty($message)) echo "<p style='color:green;'>" . htmlspecialchars($message) . "</p>"; ?>
         <form id="newIdForm" method="POST" action="fresher-id-request.php" enctype="multipart/form-data">
             <div class="form-group">
                 <label>First Name</label>

@@ -1,4 +1,5 @@
 <?php
+include 'admin_auth_check.php';
 include 'db_connect.php';
 ?>
 <!DOCTYPE html>
@@ -40,7 +41,7 @@ include 'db_connect.php';
     </thead>
     <tbody>
       <?php
-      $sql = "SELECT * FROM id_requests WHERE status='Pending'";
+      $sql = "SELECT * FROM id_requests WHERE status='Pending' ORDER BY id DESC";
       $result = $conn->query($sql);
 
       if ($result && $result->num_rows > 0) {
@@ -57,9 +58,10 @@ include 'db_connect.php';
                           <input type='hidden' name='status' value='Approved'>
                           <button type='submit' class='approve-btn'>Approve</button>
                       </form>
-                      <form method='POST' action='update_status.php' style='display:inline;'>
+                      <form method='POST' action='update_status.php' class='reject-form' style='display:inline;'>
                           <input type='hidden' name='id' value='".$row['id']."'>
                           <input type='hidden' name='status' value='Rejected'>
+                          <input type='hidden' name='rejection_reason' class='rejection-reason-input'>
                           <button type='submit' class='reject-btn'>Reject</button>
                       </form>
                     </td>";
@@ -74,5 +76,6 @@ include 'db_connect.php';
   </table>
 </div>
 
+<script src="admin.js"></script>
 </body>
 </html>

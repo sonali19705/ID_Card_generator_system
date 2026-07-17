@@ -1,6 +1,6 @@
 <?php
-include 'db_connect.php';
 session_start();
+include 'db_connect.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
@@ -11,12 +11,10 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 
 // Fetch requests for this user
-$sql = "SELECT * FROM id_requests WHERE user_id = $user_id ORDER BY id DESC";
-$result = $conn->query($sql);
-
-if (!$result) {
-    die("Query failed: " . $conn->error);
-}
+$stmt = $conn->prepare("SELECT * FROM id_requests WHERE user_id = ? ORDER BY id DESC");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -35,7 +33,7 @@ if (!$result) {
         <li><a href="profile.php">Profile</a></li>
         <li><a href="my-id-history.php" class="active">My IDs</a></li>
     </ul>
-    <form method="POST" action="index.php" style="display:inline;">
+    <form method="POST" action="logout.php" style="display:inline;">
         <button type="submit" class="logout-btn">Logout</button>
     </form>
 </nav>
@@ -59,15 +57,19 @@ if (!$result) {
                 <?php
                 if ($result->num_rows > 0) {
                     while($row = $result->fetch_assoc()) {
-                        $fullName = trim($row['student_name'] . ' ' . $row['middle_name'] . ' ' . $row['last_name']);
+                        $fullName = $row['student_name'];
                         echo "<tr>";
                         echo "<td>#".$row['id']."</td>";
-                        echo "<td>".$fullName."</td>";
-                        echo "<td>".$row['designation']."</td>";
-                        echo "<td class='status-".strtolower($row['status'])."'>".$row['status']."</td>";
-                        echo "<td>".$row['created_at']."</td>";
-                        if($row['status'] === 'Approved' && !empty($row['document'])) {
-                            echo "<td><a href='".$row['document']."' download><button class='primary-btn'>Download</button></a></td>";
+                        echo "<td>".htmlspecialchars($fullName)."</td>";
+                        echo "<td>".htmlspecialchars($row['year'])."</td>";
+                        echo "<td class='status-".strtolower($row['status'])."'>".htmlspecialchars($row['status'])."</td>";
+                        echo "<td>".htmlspecialchars($row['created_at'])."</td>";
+
+                        if ($row['status'] === 'Approved' && !empty($row['pdf_path'])) {
+                            echo "<td><a href='generate_pdf.php?id=".$row['id']."'><button class='primary-btn'>Download</button></a></td>";
+                        } elseif ($row['status'] === 'Rejected') {
+                            $reason = !empty($row['rejection_reason']) ? htmlspecialchars($row['rejection_reason']) : 'No reason provided';
+                            echo "<td>Rejected: " . $reason . "</td>";
                         } else {
                             echo "<td>—</td>";
                         }
@@ -76,6 +78,7 @@ if (!$result) {
                 } else {
                     echo "<tr><td colspan='6'>No requests found</td></tr>";
                 }
+                $stmt->close();
                 ?>
             </tbody>
         </table>

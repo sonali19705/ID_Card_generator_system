@@ -13,6 +13,10 @@
                 <h2 class="auth-title">Admin Login</h2>
                 <p class="auth-subtitle">Access your admin dashboard</p>
 
+                <?php if (isset($_GET['error'])): ?>
+                    <p style="color:red;">Invalid admin email or password.</p>
+                <?php endif; ?>
+
                 <!-- Admin Login Form -->
                 <form id="adminloginForm" action="admin_login_process.php" method="POST">
                     <div class="form-group">

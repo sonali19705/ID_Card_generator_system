@@ -3,29 +3,45 @@ include 'db_connect.php';
 $message = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $firstName = $_POST['first_name'];
-    $lastName = $_POST['last_name'];
-    $contact = $_POST['contact'];
-    $email = $_POST['email'];
-    $password = $_POST['password'];
-    $confirmPassword = $_POST['confirm_password'];
+    $firstName = trim($_POST['first_name'] ?? '');
+    $lastName = trim($_POST['last_name'] ?? '');
+    $contact = trim($_POST['contact'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $confirmPassword = $_POST['confirm_password'] ?? '';
 
-    if ($password !== $confirmPassword) {
+    if ($firstName === '' || $lastName === '' || $email === '') {
+        $message = "Please fill in all required fields.";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $message = "Please enter a valid email address.";
+    } elseif (strlen($password) < 6) {
+        $message = "Password must be at least 6 characters long.";
+    } elseif ($password !== $confirmPassword) {
         $message = "Passwords do not match!";
     } else {
-        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        // Check if email is already registered
+        $check = $conn->prepare("SELECT id FROM users WHERE email = ?");
+        $check->bind_param("s", $email);
+        $check->execute();
+        $check->store_result();
 
-        // Use prepared statement
-        $stmt = $conn->prepare("INSERT INTO users (first_name, last_name, contact, email, password) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssss", $firstName, $lastName, $contact, $email, $hashedPassword);
-
-        if ($stmt->execute()) {
-            $message = "Registration successful! <a href='index.php'>Login here</a>";
+        if ($check->num_rows > 0) {
+            $message = "An account with this email already exists. <a href='index.php'>Login here</a>";
         } else {
-            $message = "Error: " . $stmt->error;
-        }
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-        $stmt->close();
+            $stmt = $conn->prepare("INSERT INTO users (first_name, last_name, contact, email, password) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("sssss", $firstName, $lastName, $contact, $email, $hashedPassword);
+
+            if ($stmt->execute()) {
+                $message = "Registration successful! <a href='index.php'>Login here</a>";
+            } else {
+                $message = "Something went wrong. Please try again.";
+            }
+
+            $stmt->close();
+        }
+        $check->close();
     }
 }
 

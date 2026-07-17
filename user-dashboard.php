@@ -23,7 +23,7 @@ include 'db_connect.php';
         <li><a href="profile.php">Profile</a></li>
         <li><a href="my-id-history.php">My IDs</a></li>
     </ul>
-    <form method="POST" action="index.php" style="display:inline;">
+    <form method="POST" action="logout.php" style="display:inline;">
         <button type="submit" class="logout-btn">Logout</button>
     </form>
 </nav>

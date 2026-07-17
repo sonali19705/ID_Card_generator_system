@@ -1,9 +1,9 @@
 <?php
-// for db connection
+include 'admin_auth_check.php';
 include 'db_connect.php';
 
 // Fetch approved requests
-$sql = "SELECT * FROM id_requests WHERE STATUS='Approved'";
+$sql = "SELECT * FROM id_requests WHERE status='Approved' ORDER BY id DESC";
 $result = $conn->query($sql);
 
 // Check if query succeeded
@@ -29,7 +29,9 @@ if (!$result) {
       <li><a href="admin_requests.php">Requests</a></li>
       <li><a href="admin_approved.php" class="active">Approved IDs</a></li>
     </ul>
-    <button class="logout-btn">Logout</button>
+    <form method="POST" action="admin_logout.php" style="display:inline;">
+      <button type="submit" class="logout-btn">Logout</button>
+    </form>
   </div>
 
   <div class="content">

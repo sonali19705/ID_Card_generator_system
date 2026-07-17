@@ -418,6 +418,11 @@ input:focus {
     font-weight: bold;
 }
 
+.status-rejected {
+    color: #dc3545; /* A standard red for rejected status */
+    font-weight: bold;
+}
+
 .history-card, .request-card {
     background: #ffffff;
     padding: 20px;

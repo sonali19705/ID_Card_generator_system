@@ -1,0 +1,32 @@
+# ---- User-uploaded & generated files (don't belong in git) ----
+uploads/*
+!uploads/.gitkeep
+
+generated_ids/*
+!generated_ids/.gitkeep
+
+# ---- Sensitive / environment-specific files ----
+# db_connect.php contains your DB password - don't commit real credentials
+# (see note below on how to handle this properly)
+
+# ---- One-time setup script (delete after use, but ignore just in case) ----
+setup_admin.php
+
+# ---- OS junk ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Editor / IDE junk ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ---- Logs ----
+*.log
+error_log
+
+# ---- WAMP/XAMPP local artifacts (if any get created) ----
+*.sql~

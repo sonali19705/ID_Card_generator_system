@@ -2,7 +2,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const forgotPasswordLink = document.getElementById("forgotPasswordLink");
     const forgotModal = document.getElementById("forgotModal");
     const closeModal = document.getElementById("closeModal");
-    const adminLoginForm = document.getElementById("adminloginForm");
     const forgotForm = document.getElementById("forgotForm");
 
     /* ------------------- */
@@ -28,19 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     /* ------------------- */
-    /*  Login Form Submit  */
-    /* ------------------- */
-    if (adminLoginForm) {
-        adminLoginForm.addEventListener("submit", (e) => {
-            e.preventDefault();
-            alert("Login Successful! Redirecting...");
-            // You can add real authentication logic here later
-            window.location.href = "admin-dashboard.html";
-        });
-    }
-
-    /* ------------------- */
-    /* Forgot Password Submit */
+    /* Forgot Password Submit (demo only - no backend yet) */
     /* ------------------- */
     if (forgotForm) {
         forgotForm.addEventListener("submit", (e) => {
@@ -50,18 +37,25 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    /* ------------------- */
-    /* Logout Button Action */
-    /* ------------------- */
-    document.querySelectorAll(".logout-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-            // Optional: clear stored requests or session
-            // localStorage.removeItem("idRequests");
-            // OR clear everything:
-            // localStorage.clear();
+    // Admin login and logout forms submit normally to
+    // admin_login_process.php / admin_logout.php - no JS interception needed.
 
-            alert("Logged out successfully!");
-            window.location.href = "admin-login.html";
+    /* ------------------------------- */
+    /* Ask for a rejection reason      */
+    /* before submitting a Reject form */
+    /* ------------------------------- */
+    document.querySelectorAll(".reject-form").forEach((form) => {
+        form.addEventListener("submit", (e) => {
+            const reasonInput = form.querySelector(".rejection-reason-input");
+            if (reasonInput) {
+                const reason = prompt("Please enter a reason for rejecting this request:");
+                if (reason === null) {
+                    // Admin cancelled the prompt - do not submit
+                    e.preventDefault();
+                    return;
+                }
+                reasonInput.value = reason.trim();
+            }
         });
     });
 });
